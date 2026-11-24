@@ -1,0 +1,3187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세무 실무 도우미 | Tax Assistant</title>
+  <style>
+    /* ============================================================
+       🎨 테마 및 글로벌 스타일 (흰색 배경, 남색 포인트, 16px 기본 글꼴)
+       ============================================================ */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-sub: #f1f5f9;
+      --border-color: #cbd5e1;
+      --border-focus: #1e3a8a;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --navy-primary: #1e3a8a;
+      --navy-dark: #0f172a;
+      --navy-light: #2563eb;
+      --navy-soft: #eff6ff;
+      --accent-red: #dc2626;
+      --accent-red-bg: #fee2e2;
+      --accent-orange: #ea580c;
+      --accent-orange-bg: #ffedd5;
+      --accent-green: #15803d;
+      --accent-green-bg: #dcfce7;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #0b1120;
+      --bg-card: #1e293b;
+      --bg-card-sub: #0f172a;
+      --border-color: #334155;
+      --border-focus: #60a5fa;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --navy-primary: #3b82f6;
+      --navy-dark: #1e3a8a;
+      --navy-light: #60a5fa;
+      --navy-soft: #172554;
+      --accent-red: #f87171;
+      --accent-red-bg: #450a0a;
+      --accent-orange: #fb923c;
+      --accent-orange-bg: #431407;
+      --accent-green: #4ade80;
+      --accent-green-bg: #052e16;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* 상단 헤더 */
+    .app-header {
+      background-color: var(--bg-card);
+      border-bottom: 2px solid var(--navy-primary);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 탭 네비게이션 */
+    .nav-tabs {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      padding: 0 24px;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--navy-primary);
+      background-color: var(--navy-soft);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+
+    .tab-btn.active {
+      color: var(--navy-primary);
+      border-bottom-color: var(--navy-primary);
+    }
+
+    /* 메인 컨테이너 (노트북 화면 최적화) */
+    .main-container {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 24px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 카드 컴포넌트 */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* 버튼 스타일 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      line-height: 1.3;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background-color: var(--navy-primary);
+      color: #ffffff;
+      border-color: var(--navy-primary);
+    }
+    .btn-primary:hover {
+      opacity: 0.92;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border-color: var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background-color: var(--navy-soft);
+      border-color: var(--navy-primary);
+      color: var(--navy-primary);
+    }
+
+    .btn-excel {
+      background-color: #107c41;
+      color: #ffffff;
+      border-color: #107c41;
+    }
+    .btn-excel:hover {
+      background-color: #0e6b37;
+    }
+
+    .btn-danger {
+      background-color: transparent;
+      color: var(--accent-red);
+      border-color: var(--accent-red);
+    }
+    .btn-danger:hover {
+      background-color: var(--accent-red-bg);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+
+    /* 폼 요소 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-label .badge-tag {
+      font-size: 11px;
+      font-weight: normal;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      height: 42px;
+      padding: 8px 12px;
+      font-size: 16px;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--navy-soft);
+    }
+
+    .form-input.text-right {
+      text-align: right;
+    }
+
+    .input-unit-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-unit-wrapper .form-input {
+      padding-right: 32px;
+    }
+
+    .input-unit {
+      position: absolute;
+      right: 12px;
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .error-msg {
+      color: var(--accent-red);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .error-msg.show {
+      display: block;
+    }
+
+    /* KPI 요약 대시보드 카드 */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card-sub);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .kpi-card.highlight {
+      background: var(--navy-soft);
+      border-color: var(--navy-primary);
+    }
+
+    .kpi-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-card.highlight .kpi-label {
+      color: var(--navy-primary);
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-card.highlight .kpi-value {
+      color: var(--navy-primary);
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* 데이터 테이블 */
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+      text-align: left;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      background-color: var(--bg-card-sub);
+      color: var(--text-main);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr:hover {
+      background-color: var(--navy-soft);
+    }
+
+    .data-table .text-right {
+      text-align: right;
+    }
+
+    .data-table .text-center {
+      text-align: center;
+    }
+
+    .data-table tr.total-row {
+      background-color: var(--bg-card-sub);
+      font-weight: 700;
+    }
+
+    .data-table tr.total-row td {
+      border-top: 2px solid var(--border-color);
+      color: var(--navy-primary);
+    }
+
+    /* 배지 태그 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-urgent {
+      background-color: var(--accent-red-bg);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .badge-warning {
+      background-color: var(--accent-orange-bg);
+      color: var(--accent-orange);
+      border: 1px solid var(--accent-orange);
+    }
+
+    .badge-normal {
+      background-color: var(--navy-soft);
+      color: var(--navy-primary);
+      border: 1px solid var(--navy-primary);
+    }
+
+    .badge-gray {
+      background-color: var(--bg-card-sub);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .badge-postponed {
+      background-color: #fef08a;
+      color: #854d0e;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    [data-theme="dark"] .badge-postponed {
+      background-color: #713f12;
+      color: #fef08a;
+    }
+
+    /* 탭 1 캘린더 & 일정 전용 */
+    .schedule-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .view-toggles, .filter-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .calendar-container {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background-color: var(--bg-card);
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background-color: var(--bg-card-sub);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .calendar-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-day-head {
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-card-sub);
+    }
+
+    .calendar-day-head.sunday { color: var(--accent-red); }
+    .calendar-day-head.saturday { color: var(--navy-light); }
+
+    .calendar-cell {
+      min-height: 90px;
+      padding: 6px;
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: var(--bg-card);
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .calendar-cell:nth-child(7n) {
+      border-right: none;
+    }
+
+    .calendar-cell:hover {
+      background-color: var(--navy-soft);
+    }
+
+    .calendar-cell.other-month {
+      background-color: var(--bg-card-sub);
+      opacity: 0.45;
+    }
+
+    .calendar-cell.today {
+      background-color: rgba(37, 99, 235, 0.08);
+      font-weight: bold;
+    }
+
+    .calendar-cell.today .cell-date-num {
+      background-color: var(--navy-primary);
+      color: #ffffff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .cell-date-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cell-date-num {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .cell-dot-marker {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--navy-primary);
+      display: inline-block;
+    }
+
+    .cell-dot-marker.urgent {
+      background-color: var(--accent-red);
+    }
+
+    .cell-holiday-name {
+      font-size: 11px;
+      color: var(--accent-red);
+      font-weight: 700;
+    }
+
+    .calendar-cell.sunday .cell-date-num { color: var(--accent-red); }
+    .calendar-cell.saturday .cell-date-num { color: var(--navy-light); }
+
+    .cell-events {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+    }
+
+    .calendar-event-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background-color: var(--navy-soft);
+      color: var(--navy-primary);
+      border-left: 3px solid var(--navy-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .calendar-event-pill.urgent {
+      background-color: var(--accent-red-bg);
+      color: var(--accent-red);
+      border-left-color: var(--accent-red);
+    }
+
+    .calendar-event-pill.warning {
+      background-color: var(--accent-orange-bg);
+      color: var(--accent-orange);
+      border-left-color: var(--accent-orange);
+    }
+
+    /* 일정 리스트 카드 */
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .schedule-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--navy-primary);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .schedule-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    .schedule-card.urgent {
+      border-left-color: var(--accent-red);
+    }
+
+    .schedule-card.warning {
+      border-left-color: var(--accent-orange);
+    }
+
+    .schedule-card.past {
+      border-left-color: var(--text-muted);
+      opacity: 0.65;
+    }
+
+    .schedule-card-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .schedule-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .schedule-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .schedule-card-note {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .schedule-card-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: right;
+    }
+
+    .schedule-date-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .schedule-final-date {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .schedule-orig-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .schedule-dday-badge {
+      min-width: 72px;
+      text-align: center;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: var(--radius-sm);
+    }
+
+    /* 알림 바 (설정 탭 상단 등) */
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+
+    .alert-banner.warning {
+      background-color: var(--accent-orange-bg);
+      color: var(--accent-orange);
+      border: 1px solid var(--accent-orange);
+    }
+
+    .alert-banner.info {
+      background-color: var(--navy-soft);
+      color: var(--navy-primary);
+      border: 1px solid var(--navy-primary);
+    }
+
+    /* 하단 공통 푸터 */
+    .app-footer {
+      margin-top: auto;
+      background-color: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 16px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .app-footer strong {
+      color: var(--accent-red);
+    }
+
+    /* 토스트 알림 */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background-color: var(--navy-dark);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideIn 0.2s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* 모달 다이얼로그 */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy-primary);
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+      margin-top: 8px;
+    }
+
+    /* ============================================================
+       🖨️ 인쇄용 전용 스타일 (@media print)
+       ============================================================ */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 12pt !important;
+      }
+
+      .app-header,
+      .nav-tabs,
+      .header-actions,
+      .btn,
+      .schedule-toolbar,
+      .toast-container,
+      .modal-backdrop,
+      #tab-settings,
+      .no-print {
+        display: none !important;
+      }
+
+      .main-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      .tab-panel {
+        display: none !important;
+      }
+
+      .tab-panel.active {
+        display: block !important;
+      }
+
+      .card {
+        border: 1px solid #000000 !important;
+        box-shadow: none !important;
+        padding: 12px !important;
+        margin-bottom: 15px !important;
+        page-break-inside: avoid;
+      }
+
+      .card-title {
+        color: #000000 !important;
+        font-size: 15pt !important;
+        border-bottom: 1px solid #000000;
+        padding-bottom: 6px;
+      }
+
+      .data-table {
+        border: 1px solid #000000 !important;
+      }
+
+      .data-table th, .data-table td {
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+        padding: 8px !important;
+        font-size: 10.5pt !important;
+      }
+
+      .data-table th {
+        background-color: #f1f5f9 !important;
+      }
+
+      .print-header {
+        display: block !important;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .print-header h1 {
+        font-size: 18pt;
+        margin-bottom: 4px;
+      }
+
+      .print-header p {
+        font-size: 10pt;
+        color: #555555;
+      }
+    }
+
+    .print-header {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 인쇄 전용 헤더 -->
+  <div class="print-header">
+    <h1>세무 실무 도우미 계산 내역서</h1>
+    <p id="printDateTime">출력일시: 2026-11-24 | 세무 실무 참고용</p>
+  </div>
+
+  <!-- 상단 헤더 -->
+  <header class="app-header">
+    <div class="brand-group">
+      <span class="brand-icon">💼</span>
+      <div>
+        <div class="brand-title">세무 실무 도우미</div>
+        <div class="brand-subtitle">세무사무소 신입 직원을 위한 세무 실무 계산기 &amp; 마감 일정 관리</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" id="btnToggleTheme" title="다크/라이트 모드 전환">
+        <span id="themeIcon">🌓</span> 다크 모드
+      </button>
+      <button class="btn btn-primary btn-sm" id="btnPrint" title="현재 화면 인쇄">
+        🖨️ 인쇄하기
+      </button>
+    </div>
+  </header>
+
+  <!-- 상단 탭 4개 -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="tab-btn active" data-tab="tab-schedule" role="tab" aria-selected="true">
+      📅 신고 일정
+    </button>
+    <button class="tab-btn" data-tab="tab-payroll" role="tab" aria-selected="false">
+      💰 4대보험·급여
+    </button>
+    <button class="tab-btn" data-tab="tab-vat" role="tab" aria-selected="false">
+      🧾 부가세
+    </button>
+    <button class="tab-btn" data-tab="tab-settings" role="tab" aria-selected="false">
+      ⚙️ 설정
+    </button>
+  </nav>
+
+  <!-- 메인 컨텐츠 영역 -->
+  <main class="main-container">
+
+    <!-- ============================================================
+         탭 1. 📅 신고 일정 캘린더
+         ============================================================ -->
+    <section id="tab-schedule" class="tab-panel active" role="tabpanel">
+      <!-- 일정 요약 KPI -->
+      <div class="kpi-grid">
+        <div class="kpi-card highlight">
+          <span class="kpi-label">기준 일자</span>
+          <span class="kpi-value" id="kpiTodayDate">-</span>
+          <span class="kpi-sub" id="kpiTodayDayName">오늘</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">이번 달 마감 예정</span>
+          <span class="kpi-value" id="kpiThisMonthCount">0건</span>
+          <span class="kpi-sub">순연 적용 완료</span>
+        </div>
+        <div class="kpi-card" id="kpiUrgentCard">
+          <span class="kpi-label">🚨 긴급 (D-3 이내)</span>
+          <span class="kpi-value" id="kpiUrgentCount" style="color: var(--accent-red);">0건</span>
+          <span class="kpi-sub">우선 확인 필요</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">⚠️ 임박 (D-7 이내)</span>
+          <span class="kpi-value" id="kpiWarningCount" style="color: var(--accent-orange);">0건</span>
+          <span class="kpi-sub">신고서 및 서류 점검</span>
+        </div>
+      </div>
+
+      <!-- 일정 툴바 (목록/달력 전환 & 기간 필터) -->
+      <div class="schedule-toolbar">
+        <div class="filter-buttons">
+          <button class="btn btn-outline btn-sm active" id="btnFilterBoth">이번 달 + 다음 달</button>
+          <button class="btn btn-outline btn-sm" id="btnFilterThisMonth">이번 달만</button>
+          <button class="btn btn-outline btn-sm" id="btnFilterNextMonth">다음 달만</button>
+        </div>
+        <div class="view-toggles">
+          <button class="btn btn-primary btn-sm" id="btnViewList">📋 목록 보기</button>
+          <button class="btn btn-outline btn-sm" id="btnViewCalendar">📆 월 달력 보기</button>
+        </div>
+      </div>
+
+      <!-- 목록 뷰 -->
+      <div id="scheduleListView">
+        <div class="schedule-list" id="scheduleListContainer">
+          <!-- 자바스크립트로 일정 카드 동적 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 달력 뷰 -->
+      <div id="scheduleCalendarView" style="display: none;">
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button class="btn btn-outline btn-sm" id="btnCalPrev">◀ 이전 달</button>
+            <h3 id="calendarMonthTitle">2026년 11월</h3>
+            <button class="btn btn-outline btn-sm" id="btnCalNext">다음 달 ▶</button>
+          </div>
+          <div class="calendar-grid">
+            <div class="calendar-day-head sunday">일</div>
+            <div class="calendar-day-head">월</div>
+            <div class="calendar-day-head">화</div>
+            <div class="calendar-day-head">수</div>
+            <div class="calendar-day-head">목</div>
+            <div class="calendar-day-head">금</div>
+            <div class="calendar-day-head saturday">토</div>
+          </div>
+          <div class="calendar-grid" id="calendarBody">
+            <!-- 달력 일자 그리드 자바스크립트 렌더링 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         탭 2. 💰 4대보험·급여 계산기
+         ============================================================ -->
+    <section id="tab-payroll" class="tab-panel" role="tabpanel">
+      <!-- 급여 입력 폼 카드 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📝 급여 및 사업장 기본 정보 입력</span>
+          <span style="font-size: 13px; font-weight: normal; color: var(--text-muted);">
+            숫자 입력 시 쉼표(,) 자동 서식 처리
+          </span>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="inputGrossSalary">
+              월 급여 (세전 총액) <span style="color: var(--accent-red);">*</span>
+            </label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="inputGrossSalary" class="form-input text-right" placeholder="예: 3,200,000" value="3,200,000">
+              <span class="input-unit">원</span>
+            </div>
+            <div class="error-msg" id="errGrossSalary">올바른 급여 금액을 입력해 주세요. (0원 이상 숫자)</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputNonTaxable">
+              비과세 금액 (식대 등)
+              <span class="badge-tag" style="background-color: var(--navy-soft); color: var(--navy-primary);">기본 식대 20만원</span>
+            </label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="inputNonTaxable" class="form-input text-right" placeholder="예: 200,000" value="200,000">
+              <span class="input-unit">원</span>
+            </div>
+            <div class="error-msg" id="errNonTaxable">비과세 금액은 0원 이상이어야 합니다.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selectEmployerScale">
+              사업장 규모 (고용보험 사업주 요율)
+            </label>
+            <select id="selectEmployerScale" class="form-select">
+              <option value="under150" selected>150인 미만 기업 (사업주 0.25% 가산)</option>
+              <option value="over150Priority">150인 이상 우선지원대상기업 (사업주 0.45% 가산)</option>
+              <option value="over150Under1000">150인 이상 ~ 1,000인 미만 (사업주 0.65% 가산)</option>
+              <option value="over1000">1,000인 이상 및 국가·지자체 (사업주 0.85% 가산)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="inputIncomeTax">
+              소득세 (간이세액표 금액)
+              <span class="badge-tag" style="background-color: var(--bg-card-sub); color: var(--text-muted);">직접 입력</span>
+            </label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="inputIncomeTax" class="form-input text-right" placeholder="0" value="0">
+              <span class="input-unit">원</span>
+            </div>
+            <div class="error-msg" id="errIncomeTax">소득세 금액은 0원 이상 숫자여야 합니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 급여 결과 KPI 요약 카드 -->
+      <div class="kpi-grid">
+        <div class="kpi-card highlight">
+          <span class="kpi-label">💵 예상 실수령액 (세후)</span>
+          <span class="kpi-value" id="kpiNetSalary">0원</span>
+          <span class="kpi-sub">월 급여 - 근로자 공제 합계</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">과세 대상 보수월액</span>
+          <span class="kpi-value" id="kpiTaxableSalary">0원</span>
+          <span class="kpi-sub">월 급여 - 비과세액</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">근로자 공제 총액</span>
+          <span class="kpi-value" id="kpiWorkerDeduction" style="color: var(--accent-red);">0원</span>
+          <span class="kpi-sub">4대보험 + 소득세 + 지방세</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">사업주 총 부담액</span>
+          <span class="kpi-value" id="kpiEmployerCost">0원</span>
+          <span class="kpi-sub">월 급여 + 사업주 4대보험</span>
+        </div>
+      </div>
+
+      <!-- 급여 산출 상세 표 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📊 4대보험 및 세금 공제 상세 내역</span>
+          <button class="btn btn-excel btn-sm" id="btnCopyPayroll">
+            📋 급여대장용 복사 (Excel용)
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="payrollResultTable">
+            <thead>
+              <tr>
+                <th>공제 항목</th>
+                <th class="text-right">근로자 부담금</th>
+                <th class="text-right">사업주 부담금</th>
+                <th class="text-right">합계</th>
+                <th>적용 요율 및 산출 근거</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>국민연금</strong></td>
+                <td class="text-right" id="rowNpsWorker">0원</td>
+                <td class="text-right" id="rowNpsEmployer">0원</td>
+                <td class="text-right" id="rowNpsTotal">0원</td>
+                <td id="rowNpsDesc">기준소득월액 × 9.5% ÷ 2 (하한 41만~상한 659만)</td>
+              </tr>
+              <tr>
+                <td><strong>건강보험</strong></td>
+                <td class="text-right" id="rowHealthWorker">0원</td>
+                <td class="text-right" id="rowHealthEmployer">0원</td>
+                <td class="text-right" id="rowHealthTotal">0원</td>
+                <td id="rowHealthDesc">보수월액 × 7.19% ÷ 2 (근로자/사업주 각 3.595%)</td>
+              </tr>
+              <tr>
+                <td><strong>노인장기요양보험</strong></td>
+                <td class="text-right" id="rowCareWorker">0원</td>
+                <td class="text-right" id="rowCareEmployer">0원</td>
+                <td class="text-right" id="rowCareTotal">0원</td>
+                <td id="rowCareDesc">건강보험료 × (0.9448 ÷ 7.19) ÷ 2</td>
+              </tr>
+              <tr>
+                <td><strong>고용보험</strong></td>
+                <td class="text-right" id="rowEmpWorker">0원</td>
+                <td class="text-right" id="rowEmpEmployer">0원</td>
+                <td class="text-right" id="rowEmpTotal">0원</td>
+                <td id="rowEmpDesc">근로자 0.9% / 사업주 0.9% + 규모별 요율</td>
+              </tr>
+              <tr>
+                <td><strong>소득세</strong></td>
+                <td class="text-right" id="rowIncomeTaxWorker">0원</td>
+                <td class="text-right" style="color: var(--text-muted);">-</td>
+                <td class="text-right" id="rowIncomeTaxTotal">0원</td>
+                <td>간이세액표 기준 직접 입력 금액</td>
+              </tr>
+              <tr>
+                <td><strong>지방소득세</strong></td>
+                <td class="text-right" id="rowLocalTaxWorker">0원</td>
+                <td class="text-right" style="color: var(--text-muted);">-</td>
+                <td class="text-right" id="rowLocalTaxTotal">0원</td>
+                <td>소득세의 10% (10원 미만 절사)</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td><strong>공제 합계</strong></td>
+                <td class="text-right" id="rowTotalWorker">0원</td>
+                <td class="text-right" id="rowTotalEmployer">0원</td>
+                <td class="text-right" id="rowGrandTotal">0원</td>
+                <td><strong>실수령액: <span id="rowFootNetSalary">0원</span></strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- 탭 2 필수 하단 안내 문구 -->
+      <div class="alert-banner info">
+        <span>ℹ️</span>
+        <span>건강보험 보수월액 상·하한, 두루누리 지원, 정산보험료는 반영되지 않습니다.</span>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         탭 3. 🧾 부가세 계산기
+         ============================================================ -->
+    <section id="tab-vat" class="tab-panel" role="tabpanel">
+      <!-- 모드 선택 및 단건 간편 계산 카드 -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚡ 부가가치세 간편 계산</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary btn-sm" id="btnVatModeSupply">
+              공급가액 ➔ 합계
+            </button>
+            <button class="btn btn-outline btn-sm" id="btnVatModeTotal">
+              합계 ➔ 공급가액 (역산)
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid" style="align-items: flex-end;">
+          <div class="form-group" style="flex: 2;">
+            <label class="form-label" id="labelVatQuickInput" for="inputQuickVatAmount">
+              공급가액 입력
+            </label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="inputQuickVatAmount" class="form-input text-right" placeholder="예: 1,000,000" value="1,000,000">
+              <span class="input-unit">원</span>
+            </div>
+            <div class="error-msg" id="errQuickVat">유효한 금액(0원 이상의 숫자)을 입력하세요.</div>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <button class="btn btn-primary" id="btnApplyQuickToTable" style="height: 42px; width: 100%;">
+              ➕ 목록에 추가
+            </button>
+          </div>
+        </div>
+
+        <!-- 단건 즉시 계산 결과 뷰 -->
+        <div class="kpi-grid" style="margin-top: 16px; margin-bottom: 0;">
+          <div class="kpi-card">
+            <span class="kpi-label">공급가액</span>
+            <span class="kpi-value" id="quickResultSupply">1,000,000원</span>
+            <span class="kpi-sub">순수 거래가액</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">부가가치세 (10%)</span>
+            <span class="kpi-value" id="quickResultVat" style="color: var(--navy-primary);">100,000원</span>
+            <span class="kpi-sub" id="quickResultVatSub">공급가액의 10%</span>
+          </div>
+          <div class="kpi-card highlight">
+            <span class="kpi-label">합계금액 (공급대가)</span>
+            <span class="kpi-value" id="quickResultTotal">1,100,000원</span>
+            <span class="kpi-sub">공급가액 + 부가세액</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 다건 세금계산서·영수증 목록 카드 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 여러 건 계산 목록표 (세금계산서·영수증 묶음)</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline btn-sm" id="btnAddVatRow">➕ 행 추가</button>
+            <button class="btn btn-danger btn-sm" id="btnClearVatRows">🧹 비우기</button>
+            <button class="btn btn-excel btn-sm" id="btnCopyVatTable">📋 엑셀 복사</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="vatBatchTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;" class="text-center">#</th>
+                <th style="min-width: 180px;">품목 / 거래처명 / 메모</th>
+                <th style="width: 140px;">계산 모드</th>
+                <th style="min-width: 160px;" class="text-right">입력 금액 (원)</th>
+                <th style="min-width: 140px;" class="text-right">공급가액 (원)</th>
+                <th style="min-width: 130px;" class="text-right">부가세액 (원)</th>
+                <th style="min-width: 150px;" class="text-right">합계금액 (원)</th>
+                <th style="width: 70px;" class="text-center">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="vatTableBody">
+              <!-- JS로 행 렌더링 -->
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4" class="text-center"><strong>총 합계 (<span id="vatTotalCount">0</span>건)</strong></td>
+                <td class="text-right" id="vatTotalSupply">0원</td>
+                <td class="text-right" id="vatTotalTax">0원</td>
+                <td class="text-right" id="vatTotalAmount">0원</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         탭 4. ⚙️ 설정
+         ============================================================ -->
+    <section id="tab-settings" class="tab-panel" role="tabpanel">
+      <!-- 설정 상단 필수 고정 경고 문구 -->
+      <div class="alert-banner warning">
+        <span>⚠️</span>
+        <span>
+          <strong>주의:</strong> 요율은 매년 1월·7월에 바뀔 수 있습니다. 국민연금공단·건강보험공단·근로복지공단에서 확인 후 수정하세요.
+        </span>
+      </div>
+
+      <!-- 1. 4대보험 및 세액 요율 설정 -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚙️ 4대보험 및 부가가치세 기본 요율 설정</span>
+          <button class="btn btn-outline btn-sm" id="btnResetTo2026">
+            🔄 2026년 기본값으로 초기화
+          </button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="cfgNpsRate">국민연금 총 요율 (%)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.01" id="cfgNpsRate" class="form-input text-right" value="9.5">
+              <span class="input-unit">%</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">근로자 4.75%, 사업주 4.75% 분담</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgNpsLower">국민연금 기준소득월액 하한액</label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="cfgNpsLower" class="form-input text-right" value="410,000">
+              <span class="input-unit">원</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgNpsUpper">국민연금 기준소득월액 상한액</label>
+            <div class="input-unit-wrapper">
+              <input type="text" id="cfgNpsUpper" class="form-input text-right" value="6,590,000">
+              <span class="input-unit">원</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgHealthRate">건강보험 총 요율 (%)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.01" id="cfgHealthRate" class="form-input text-right" value="7.19">
+              <span class="input-unit">%</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">근로자 3.595%, 사업주 3.595% 분담</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgCareNumerator">장기요양보험 요율 산정 인자 (분자)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.0001" id="cfgCareNumerator" class="form-input text-right" value="0.9448">
+              <span class="input-unit">%</span>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">건강보험료 × (0.9448 ÷ 7.19)</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgEmpWorkerRate">고용보험 근로자 요율 (%)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.01" id="cfgEmpWorkerRate" class="form-input text-right" value="0.9">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgScaleUnder150">고용안정·직능 사업주 (150인 미만)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.01" id="cfgScaleUnder150" class="form-input text-right" value="0.25">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgScaleOver150P">고용안정·직능 (150인 이상 우선지원)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="0.01" id="cfgScaleOver150P" class="form-input text-right" value="0.45">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgTruncation">보험료 절사 기준</label>
+            <select id="cfgTruncation" class="form-select">
+              <option value="10" selected>10원 미만 절사 (표준)</option>
+              <option value="1">1원 미만 절사 (원단위)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cfgVatRate">부가가치세 기본 세율 (%)</label>
+            <div class="input-unit-wrapper">
+              <input type="number" step="1" id="cfgVatRate" class="form-input text-right" value="10">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+          <button class="btn btn-primary" id="btnSaveRates">💾 요율 설정 저장</button>
+        </div>
+      </div>
+
+      <!-- 2. 신고 일정 관리 -->
+      <div class="card">
+        <div class="card-title">
+          <span>📅 신고 일정 커스텀 관리</span>
+          <button class="btn btn-outline btn-sm" id="btnOpenAddScheduleModal">
+            ➕ 새 신고 일정 추가
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>일정 제목</th>
+                <th>주기 / 해당월</th>
+                <th>마감 일자</th>
+                <th>세목 구분</th>
+                <th>비고</th>
+                <th style="width: 80px;" class="text-center">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="settingsScheduleTableBody">
+              <!-- JS로 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. 공휴일 관리 (설날, 추석, 대체공휴일 등) -->
+      <div class="card">
+        <div class="card-title">
+          <span>🎌 공휴일 관리 (기한 순연용)</span>
+        </div>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">
+          • 기본 양력 고정 공휴일 (1/1 신정, 3/1 삼일절, 5/5 어린이날, 6/6 현충일, 8/15 광복절, 10/3 개천절, 10/9 한글날, 12/25 성탄절)은 시스템에 내장되어 자동 순연됩니다.<br>
+          • <strong>설날, 추석, 부처님오신날, 대체공휴일, 임시공휴일</strong>은 아래에서 해당 연도의 날짜를 직접 등록해 주세요.
+        </p>
+
+        <div class="form-grid" style="align-items: flex-end; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label" for="inputHolidayDate">공휴일 날짜 선택</label>
+            <input type="date" id="inputHolidayDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inputHolidayName">공휴일 명칭</label>
+            <input type="text" id="inputHolidayName" class="form-input" placeholder="예: 설날 연휴, 대체공휴일">
+          </div>
+          <div class="form-group">
+            <button class="btn btn-primary" id="btnAddHoliday" style="height: 42px;">
+              ➕ 공휴일 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">날짜</th>
+                <th>공휴일 명칭</th>
+                <th style="width: 100px;">구분</th>
+                <th style="width: 80px;" class="text-center">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="holidayTableBody">
+              <!-- JS로 사용자 공휴일 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. 설정 내보내기/불러오기 -->
+      <div class="card">
+        <div class="card-title">
+          <span>💾 설정 백업 및 PC 간 이동 (내보내기 / 불러오기)</span>
+        </div>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+          설정한 요율, 커스텀 신고 일정, 사용자 공휴일 목록을 JSON 파일로 저장하거나 다른 컴퓨터로 가져올 수 있습니다.
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+          <button class="btn btn-outline" id="btnExportSettings">
+            📤 설정 내보내기 (JSON 다운로드)
+          </button>
+          <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 0;">
+            📥 설정 불러오기 (JSON 파일)
+            <input type="file" id="inputFileImport" accept=".json" style="display: none;">
+          </label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 하단 공통 면책 안내 문구 (모든 탭 공통) -->
+  <footer class="app-footer">
+    <p>⚠️ <strong>본 도구는 참고용이며, 최종 신고 금액·일정은 홈택스 및 각 공단에서 확인하세요.</strong></p>
+    <p style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">
+      세무 실무 도우미 | 세무회계 실무자용 오프라인 단일 파일 솔루션
+    </p>
+  </footer>
+
+  <!-- 일정 추가 모달 -->
+  <div class="modal-backdrop" id="modalAddSchedule">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4 class="modal-title">새 신고 일정 등록</h4>
+        <button class="modal-close-btn" id="btnCloseScheduleModal">&times;</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalSchTitle">일정 제목 <span style="color: var(--accent-red);">*</span></label>
+        <input type="text" id="modalSchTitle" class="form-input" placeholder="예: 사업소득 간이지급명세서 제출">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalSchCycle">일정 주기</label>
+        <select id="modalSchCycle" class="form-select">
+          <option value="monthly">매월 반복</option>
+          <option value="yearly">특정 월 1회 (연간)</option>
+        </select>
+      </div>
+      <div class="form-group" id="modalSchMonthGroup" style="display: none;">
+        <label class="form-label" for="modalSchMonth">해당 월 (1~12월)</label>
+        <select id="modalSchMonth" class="form-select">
+          <option value="1">1월</option>
+          <option value="2">2월</option>
+          <option value="3">3월</option>
+          <option value="4">4월</option>
+          <option value="5">5월</option>
+          <option value="6">6월</option>
+          <option value="7">7월</option>
+          <option value="8">8월</option>
+          <option value="9">9월</option>
+          <option value="10">10월</option>
+          <option value="11">11월</option>
+          <option value="12">12월</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalSchDay">마감 일자 (1~31일) <span style="color: var(--accent-red);">*</span></label>
+        <input type="number" id="modalSchDay" class="form-input" min="1" max="31" value="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalSchCategory">세목 구분</label>
+        <input type="text" id="modalSchCategory" class="form-input" placeholder="예: 원천세, 부가가치세, 법인세, 소득세">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="modalSchNote">비고 / 안내 사항</label>
+        <input type="text" id="modalSchNote" class="form-input" placeholder="예: 반기신고자는 1월, 7월">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelAddSchedule">취소</button>
+        <button class="btn btn-primary" id="btnConfirmAddSchedule">등록하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 달력 날짜 클릭 상세 모달 -->
+  <div class="modal-backdrop" id="modalDayDetail">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4 class="modal-title" id="dayDetailTitle">날짜별 세무 일정</h4>
+        <button class="modal-close-btn" id="btnCloseDayDetail">&times;</button>
+      </div>
+      <div id="dayDetailBody" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- JS로 일정 항목 표시 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCloseDayDetailBtn">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ============================================================
+       자바스크립트 로직 (순수 Vanilla ES6, 오프라인 동작, 예외 안전)
+       ============================================================ -->
+  <script>
+    // ============================================================
+    // 📌 2026년 기준 기본 세무 및 4대보험 설정값 (요구사항 명시값 100% 반영)
+    // ============================================================
+    const DEFAULT_SETTINGS = {
+      // 1. 국민연금 요율 및 상·하한액
+      npsRate: 9.5, // 국민연금 총 요율 (%) - 근로자 4.75%, 사업주 4.75%
+      npsLowerLimit: 410000, // 기준소득월액 하한액 (원)
+      npsUpperLimit: 6590000, // 기준소득월액 상한액 (원)
+
+      // 2. 건강보험 및 노인장기요양보험 요율
+      healthRate: 7.19, // 건강보험 총 요율 (%) - 근로자 3.595%, 사업주 3.595%
+      careNumerator: 0.9448, // 장기요양보험 산정 공식 분자 (0.9448 ÷ 7.19)
+      careDenominator: 7.19, // 장기요양보험 산정 공식 분모
+
+      // 3. 고용보험 요율
+      empWorkerRate: 0.9, // 근로자 고용보험(실업급여) 요율 (%)
+      empScaleRates: {
+        under150: 0.25, // 150인 미만 기업 (가산 0.25%)
+        over150Priority: 0.45, // 150인 이상 우선지원대상기업 (가산 0.45%)
+        over150Under1000: 0.65, // 150인 이상 ~ 1,000인 미만 (가산 0.65%)
+        over1000: 0.85 // 1,000인 이상 및 국가·지자체 (가산 0.85%)
+      },
+
+      // 4. 절사 단위 및 부가세율
+      truncationUnit: 10, // 10원 미만 절사 (10: 10원 절사, 1: 1원 절사)
+      vatRate: 10, // 부가가치세 기본 세율 (%)
+
+      // 5. 기본 세무 신고 마감 일정 (설정 탭에서 추가·수정·삭제 가능)
+      schedules: [
+        {
+          id: 'sch-1',
+          title: '원천세 신고·납부',
+          cycle: 'monthly',
+          month: 0, // 매월
+          day: 10,
+          category: '원천세',
+          note: '매월 10일 (반기납부자는 1월 10일, 7월 10일)'
+        },
+        {
+          id: 'sch-2',
+          title: '부가가치세 2기 확정신고',
+          cycle: 'yearly',
+          month: 1,
+          day: 25,
+          category: '부가가치세',
+          note: '개인 일반과세자 및 법인사업자 (1.25)'
+        },
+        {
+          id: 'sch-3',
+          title: '근로소득 지급명세서 제출',
+          cycle: 'yearly',
+          month: 3,
+          day: 10,
+          category: '지급명세서',
+          note: '전년도 귀속 근로·퇴직·사업소득 등'
+        },
+        {
+          id: 'sch-4',
+          title: '법인세 신고 (12월 결산법인)',
+          cycle: 'yearly',
+          month: 3,
+          day: 31,
+          category: '법인세',
+          note: '12월 결산 일반법인 신고·납부'
+        },
+        {
+          id: 'sch-5',
+          title: '부가가치세 1기 예정신고/고지',
+          cycle: 'yearly',
+          month: 4,
+          day: 25,
+          category: '부가가치세',
+          note: '법인 예정신고 및 개인 예정고지 납부'
+        },
+        {
+          id: 'sch-6',
+          title: '종합소득세 신고',
+          cycle: 'yearly',
+          month: 5,
+          day: 31,
+          category: '종합소득세',
+          note: '전년도 귀속 종합소득세 확정신고·납부'
+        },
+        {
+          id: 'sch-7',
+          title: '종합소득세 성실신고확인대상자',
+          cycle: 'yearly',
+          month: 6,
+          day: 30,
+          category: '종합소득세',
+          note: '성실신고확인서 제출자 1개월 연장'
+        },
+        {
+          id: 'sch-8',
+          title: '부가가치세 1기 확정신고',
+          cycle: 'yearly',
+          month: 7,
+          day: 25,
+          category: '부가가치세',
+          note: '개인 일반과세자 및 법인사업자 (7.25)'
+        },
+        {
+          id: 'sch-9',
+          title: '부가가치세 2기 예정신고/고지',
+          cycle: 'yearly',
+          month: 10,
+          day: 25,
+          category: '부가가치세',
+          note: '법인 예정신고 및 개인 예정고지 납부'
+        }
+      ],
+
+      // 6. 사용자 등록 공휴일 (설날, 추석, 대체공휴일 등)
+      customHolidays: []
+    };
+
+    // 양력 고정 공휴일 (법정 고정 8일)
+    const FIXED_SOLAR_HOLIDAYS = [
+      { monthDay: '01-01', name: '신정' },
+      { monthDay: '03-01', name: '삼일절' },
+      { monthDay: '05-05', name: '어린이날' },
+      { monthDay: '06-06', name: '현충일' },
+      { monthDay: '08-15', name: '광복절' },
+      { monthDay: '10-03', name: '개천절' },
+      { monthDay: '10-09', name: '한글날' },
+      { monthDay: '12-25', name: '성탄절' }
+    ];
+
+    // 애플리케이션 전역 상태
+    let appSettings = {};
+    let currentScheduleFilter = 'both'; // 'both' | 'this' | 'next'
+    let currentScheduleView = 'list'; // 'list' | 'calendar'
+    let calendarTargetDate = new Date();
+    let vatBatchItems = [];
+    let vatCurrentMode = 'supplyToTotal'; // 'supplyToTotal' | 'totalToSupply'
+
+    const STORAGE_KEY = 'tax_assistant_v1_settings';
+    const THEME_KEY = 'tax_assistant_theme';
+
+    // ============================================================
+    // 🛠️ 공통 유틸리티 함수
+    // ============================================================
+
+    // 숫자 파싱 (쉼표 및 공백 제거)
+    function parseNumber(val) {
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      if (!val) return 0;
+      const clean = String(val).replace(/,/g, '').trim();
+      const num = Number(clean);
+      return isNaN(num) ? 0 : num;
+    }
+
+    // 천 단위 쉼표 포맷
+    function formatCurrency(val) {
+      const num = Math.round(Number(val) || 0);
+      return num.toLocaleString('ko-KR');
+    }
+
+    // 날짜 포맷팅 (YYYY-MM-DD)
+    function formatDateYMD(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    // 날짜 포맷팅 (M월 D일 (요일))
+    function formatDateKorean(d) {
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      return `${d.getMonth() + 1}월 ${d.getDate()}일(${days[d.getDay()]})`;
+    }
+
+    // 토스트 알림 출력
+    function showToast(message, type = 'normal') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      if (type === 'error') {
+        toast.style.backgroundColor = '#dc2626';
+      }
+      toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // 엑셀 클립보드 복사 (TSV 형식, 권한 예외 fallback 완비)
+    function copyTextToClipboard(text, successMsg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(successMsg);
+        }).catch(() => {
+          fallbackClipboardCopy(text, successMsg);
+        });
+      } else {
+        fallbackClipboardCopy(text, successMsg);
+      }
+    }
+
+    function fallbackClipboardCopy(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showToast(successMsg);
+        } else {
+          showToast('복사에 실패했습니다. 직접 복사해 주세요.', 'error');
+        }
+      } catch (err) {
+        showToast('클립보드 접근 권한이 없습니다.', 'error');
+      }
+      document.body.removeChild(ta);
+    }
+
+    // 입력창 쉼표 자동 서식 처리 (커서 위치 보존)
+    function bindAutoCommaInput(inputEl, onChangeCallback) {
+      inputEl.addEventListener('input', () => {
+        const original = inputEl.value;
+        const cursor = inputEl.selectionStart || 0;
+        const clean = original.replace(/,/g, '').trim();
+
+        // 음수이거나 문자인 경우 자동 포맷 건너뜀 (에러 표시를 위해 원본 유지)
+        if (clean === '' || isNaN(clean) || clean.includes('-')) {
+          if (onChangeCallback) onChangeCallback();
+          return;
+        }
+
+        const commasBefore = (original.slice(0, cursor).match(/,/g) || []).length;
+        const formatted = Number(clean).toLocaleString('ko-KR');
+        inputEl.value = formatted;
+
+        const commasAfter = (formatted.slice(0, cursor).match(/,/g) || []).length;
+        const newCursor = Math.max(0, cursor + (commasAfter - commasBefore));
+        inputEl.setSelectionRange(newCursor, newCursor);
+
+        if (onChangeCallback) onChangeCallback();
+      });
+
+      inputEl.addEventListener('blur', () => {
+        const clean = inputEl.value.replace(/,/g, '').trim();
+        if (clean !== '' && !isNaN(clean) && Number(clean) >= 0) {
+          inputEl.value = formatCurrency(clean);
+        }
+        if (onChangeCallback) onChangeCallback();
+      });
+    }
+
+    // ============================================================
+    // ⚙️ 설정 로딩 및 저장 (localStorage 예외 방어)
+    // ============================================================
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          // 기본값과 병합하여 신규 필드 누락 방지
+          appSettings = Object.assign({}, DEFAULT_SETTINGS, parsed);
+          return;
+        }
+      } catch (err) {
+        console.warn('설정 불러오기 실패 (기본값 사용):', err);
+      }
+      appSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appSettings));
+        return true;
+      } catch (err) {
+        console.warn('설정 저장 실패:', err);
+        return false;
+      }
+    }
+
+    // ============================================================
+    // 📅 탭 1. 신고 일정 및 기한 순연 계산 로직
+    // ============================================================
+
+    // 특정 날짜가 공휴일이거나 주말인지 판정
+    function checkIsHolidayOrWeekend(dateObj) {
+      const day = dateObj.getDay();
+      if (day === 0) return { isOff: true, reason: '일요일' };
+      if (day === 6) return { isOff: true, reason: '토요일' };
+
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      const md = `${m}-${d}`;
+      const ymd = formatDateYMD(dateObj);
+
+      // 1. 양력 고정 공휴일 검사
+      const fixed = FIXED_SOLAR_HOLIDAYS.find(h => h.monthDay === md);
+      if (fixed) return { isOff: true, reason: fixed.name };
+
+      // 2. 사용자 등록 공휴일 검사 (설/추석/대체공휴일)
+      const custom = (appSettings.customHolidays || []).find(h => h.date === ymd || h.date === md);
+      if (custom) return { isOff: true, reason: custom.name };
+
+      return { isOff: false, reason: '' };
+    }
+
+    // 기한 순연 규칙 적용: 마감일이 토·일·공휴일이면 다음 영업일로 이동
+    function getAdjustedDeadline(year, month, day) {
+      const originalDate = new Date(year, month - 1, day);
+      let adjustedDate = new Date(year, month - 1, day);
+      let isPostponed = false;
+      const reasons = [];
+
+      let iterations = 0;
+      while (iterations < 45) { // 무한 루프 방지
+        const check = checkIsHolidayOrWeekend(adjustedDate);
+        if (check.isOff) {
+          isPostponed = true;
+          reasons.push(`${formatDateKorean(adjustedDate)} ${check.reason}`);
+          adjustedDate.setDate(adjustedDate.getDate() + 1);
+          iterations++;
+        } else {
+          break;
+        }
+      }
+
+      return {
+        originalDate,
+        adjustedDate,
+        isPostponed,
+        reasons
+      };
+    }
+
+    // D-Day 계산 (00시 기준)
+    function calculateDDay(targetDate, baseDate = new Date()) {
+      const t1 = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate()).getTime();
+      const t2 = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
+      return Math.round((t2 - t1) / (1000 * 60 * 60 * 24));
+    }
+
+    // 이번 달 및 다음 달 마감 일정 인스턴스 생성
+    function generateTargetSchedules(baseDate = new Date()) {
+      const curYear = baseDate.getFullYear();
+      const curMonth = baseDate.getMonth() + 1; // 1~12
+
+      const nextYear = curMonth === 12 ? curYear + 1 : curYear;
+      const nextMonth = curMonth === 12 ? 1 : curMonth + 1;
+
+      const targetMonths = [
+        { year: curYear, month: curMonth, label: 'this' },
+        { year: nextYear, month: nextMonth, label: 'next' }
+      ];
+
+      const instances = [];
+
+      targetMonths.forEach(tm => {
+        appSettings.schedules.forEach(sch => {
+          let shouldInclude = false;
+          if (sch.cycle === 'monthly') {
+            shouldInclude = true;
+          } else if (sch.cycle === 'yearly' && sch.month === tm.month) {
+            shouldInclude = true;
+          }
+
+          if (shouldInclude) {
+            const adj = getAdjustedDeadline(tm.year, tm.month, sch.day);
+            const dday = calculateDDay(adj.adjustedDate, baseDate);
+            instances.push({
+              id: `${sch.id}-${tm.year}-${tm.month}`,
+              scheduleId: sch.id,
+              title: sch.title,
+              category: sch.category || '기타',
+              note: sch.note || '',
+              targetMonthLabel: tm.label,
+              year: tm.year,
+              month: tm.month,
+              day: sch.day,
+              originalDate: adj.originalDate,
+              adjustedDate: adj.adjustedDate,
+              isPostponed: adj.isPostponed,
+              postponedReasons: adj.reasons,
+              dday: dday
+            });
+          }
+        });
+      });
+
+      // D-Day 순 오름차순 정렬 (임박한 일정 우선, 마감 지난 일정은 뒤로)
+      instances.sort((a, b) => {
+        if (a.dday >= 0 && b.dday >= 0) return a.dday - b.dday;
+        if (a.dday < 0 && b.dday < 0) return b.dday - a.dday;
+        return a.dday >= 0 ? -1 : 1;
+      });
+
+      return instances;
+    }
+
+    // 일정 탭 렌더링
+    function renderScheduleTab() {
+      const today = new Date();
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+
+      // 상단 KPI 일자 표시
+      document.getElementById('kpiTodayDate').textContent = `${today.getFullYear()}.${today.getMonth() + 1}.${today.getDate()}`;
+      document.getElementById('kpiTodayDayName').textContent = `${days[today.getDay()]}요일`;
+
+      const allInstances = generateTargetSchedules(today);
+
+      // 이번 달 인스턴스 통계
+      const thisMonthItems = allInstances.filter(item => item.targetMonthLabel === 'this');
+      const urgentItems = allInstances.filter(item => item.dday >= 0 && item.dday <= 3);
+      const warningItems = allInstances.filter(item => item.dday > 3 && item.dday <= 7);
+
+      document.getElementById('kpiThisMonthCount').textContent = `${thisMonthItems.length}건`;
+      document.getElementById('kpiUrgentCount').textContent = `${urgentItems.length}건`;
+      document.getElementById('kpiWarningCount').textContent = `${warningItems.length}건`;
+
+      // 필터 적용
+      let displayItems = allInstances;
+      if (currentScheduleFilter === 'this') {
+        displayItems = allInstances.filter(i => i.targetMonthLabel === 'this');
+      } else if (currentScheduleFilter === 'next') {
+        displayItems = allInstances.filter(i => i.targetMonthLabel === 'next');
+      }
+
+      // 1. 목록 렌더링
+      const listContainer = document.getElementById('scheduleListContainer');
+      if (displayItems.length === 0) {
+        listContainer.innerHTML = `
+          <div class="card text-center" style="padding: 40px; color: var(--text-muted);">
+            해당 기간에 예정된 신고 일정이 없습니다.
+          </div>
+        `;
+      } else {
+        listContainer.innerHTML = displayItems.map(item => {
+          let cardStatusClass = '';
+          let ddayBadgeHtml = '';
+
+          if (item.dday === 0) {
+            cardStatusClass = 'urgent';
+            ddayBadgeHtml = `<div class="schedule-dday-badge" style="background-color: var(--accent-red); color: white;">D-Day 오늘</div>`;
+          } else if (item.dday > 0 && item.dday <= 3) {
+            cardStatusClass = 'urgent';
+            ddayBadgeHtml = `<div class="schedule-dday-badge" style="background-color: var(--accent-red-bg); color: var(--accent-red); border: 1px solid var(--accent-red);">D-${item.dday}</div>`;
+          } else if (item.dday > 3 && item.dday <= 7) {
+            cardStatusClass = 'warning';
+            ddayBadgeHtml = `<div class="schedule-dday-badge" style="background-color: var(--accent-orange-bg); color: var(--accent-orange); border: 1px solid var(--accent-orange);">D-${item.dday}</div>`;
+          } else if (item.dday > 7) {
+            ddayBadgeHtml = `<div class="schedule-dday-badge" style="background-color: var(--navy-soft); color: var(--navy-primary); border: 1px solid var(--navy-primary);">D-${item.dday}</div>`;
+          } else {
+            cardStatusClass = 'past';
+            ddayBadgeHtml = `<div class="schedule-dday-badge" style="background-color: var(--bg-card-sub); color: var(--text-muted); border: 1px solid var(--border-color);">마감됨</div>`;
+          }
+
+          const postponedBadge = item.isPostponed
+            ? `<span class="badge badge-postponed" title="사유: ${item.postponedReasons.join(', ')}">순연</span>`
+            : '';
+
+          const origDateText = item.isPostponed
+            ? `<span class="schedule-orig-date">원래 ${formatDateKorean(item.originalDate)}</span>`
+            : '';
+
+          return `
+            <div class="schedule-card ${cardStatusClass}">
+              <div class="schedule-card-left">
+                <div class="schedule-card-header">
+                  <span class="badge badge-normal">${item.category}</span>
+                  <span class="schedule-card-title">${item.title}</span>
+                  ${postponedBadge}
+                </div>
+                <div class="schedule-card-note">${item.note}</div>
+              </div>
+              <div class="schedule-card-right">
+                <div class="schedule-date-box">
+                  <div class="schedule-final-date">
+                    ${formatDateKorean(item.adjustedDate)}
+                  </div>
+                  ${origDateText}
+                </div>
+                ${ddayBadgeHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. 달력 렌더링
+      renderCalendarView();
+    }
+
+    // 월간 달력 렌더링
+    function renderCalendarView() {
+      const y = calendarTargetDate.getFullYear();
+      const m = calendarTargetDate.getMonth(); // 0~11
+      document.getElementById('calendarMonthTitle').textContent = `${y}년 ${m + 1}월`;
+
+      const firstDay = new Date(y, m, 1);
+      const lastDay = new Date(y, m + 1, 0);
+
+      const startDayOfWeek = firstDay.getDay(); // 0(일)~6(토)
+      const totalDays = lastDay.getDate();
+
+      const prevMonthLastDay = new Date(y, m, 0).getDate();
+
+      const calendarBody = document.getElementById('calendarBody');
+      calendarBody.innerHTML = '';
+
+      const today = new Date();
+      const todayYMD = formatDateYMD(today);
+
+      // 해당 연도/월의 모든 일정 인스턴스 계산
+      const monthInstances = [];
+      appSettings.schedules.forEach(sch => {
+        if (sch.cycle === 'monthly' || (sch.cycle === 'yearly' && sch.month === (m + 1))) {
+          const adj = getAdjustedDeadline(y, m + 1, sch.day);
+          monthInstances.push({
+            ...sch,
+            adjustedDate: adj.adjustedDate,
+            isPostponed: adj.isPostponed,
+            day: adj.adjustedDate.getDate(),
+            month: adj.adjustedDate.getMonth() + 1,
+            year: adj.adjustedDate.getFullYear()
+          });
+        }
+      });
+
+      // 이전 달 날짜 칸
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell other-month';
+        cell.innerHTML = `
+          <div class="cell-top">
+            <span class="cell-date-num">${prevMonthLastDay - i}</span>
+          </div>
+        `;
+        calendarBody.appendChild(cell);
+      }
+
+      // 이번 달 날짜 칸
+      for (let dayNum = 1; dayNum <= totalDays; dayNum++) {
+        const cellDate = new Date(y, m, dayNum);
+        const cellYMD = formatDateYMD(cellDate);
+        const dayOfWeek = cellDate.getDay();
+
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        if (dayOfWeek === 0) cell.classList.add('sunday');
+        if (dayOfWeek === 6) cell.classList.add('saturday');
+        if (cellYMD === todayYMD) cell.classList.add('today');
+
+        // 휴일 확인
+        const holidayCheck = checkIsHolidayOrWeekend(cellDate);
+        let holidayNameHtml = '';
+        if (holidayCheck.isOff && holidayCheck.reason !== '토요일' && holidayCheck.reason !== '일요일') {
+          holidayNameHtml = `<span class="cell-holiday-name">${holidayCheck.reason}</span>`;
+        }
+
+        // 해당 일자 마감 이벤트들
+        const eventsOnThisDay = monthInstances.filter(
+          item => item.year === y && item.month === (m + 1) && item.day === dayNum
+        );
+
+        let dotMarkerHtml = '';
+        if (eventsOnThisDay.length > 0) {
+          const hasUrgent = eventsOnThisDay.some(ev => {
+            const d = calculateDDay(ev.adjustedDate, today);
+            return d >= 0 && d <= 3;
+          });
+          dotMarkerHtml = `<span class="cell-dot-marker ${hasUrgent ? 'urgent' : ''}" title="마감 일정 ${eventsOnThisDay.length}건"></span>`;
+        }
+
+        const eventsHtml = eventsOnThisDay.map(ev => {
+          const dday = calculateDDay(ev.adjustedDate, today);
+          let pillClass = '';
+          if (dday >= 0 && dday <= 3) pillClass = 'urgent';
+          else if (dday > 3 && dday <= 7) pillClass = 'warning';
+
+          const mark = ev.isPostponed ? '(순연)' : '';
+          return `
+            <div class="calendar-event-pill ${pillClass}" title="${ev.title} ${mark} - ${ev.note}">
+              • ${ev.title} ${mark}
+            </div>
+          `;
+        }).join('');
+
+        cell.innerHTML = `
+          <div class="cell-top">
+            <div class="cell-date-wrapper">
+              <span class="cell-date-num">${dayNum}</span>
+              ${dotMarkerHtml}
+            </div>
+            ${holidayNameHtml}
+          </div>
+          <div class="cell-events">${eventsHtml}</div>
+        `;
+
+        cell.addEventListener('click', () => {
+          openDayDetailModal(cellDate, eventsOnThisDay, holidayCheck);
+        });
+
+        calendarBody.appendChild(cell);
+      }
+
+      // 다음 달 잔여 칸 채우기 (총 칸수가 7의 배수가 되도록)
+      const totalCells = startDayOfWeek + totalDays;
+      const remainingCells = (7 - (totalCells % 7)) % 7;
+      for (let d = 1; d <= remainingCells; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell other-month';
+        cell.innerHTML = `
+          <div class="cell-top">
+            <span class="cell-date-num">${d}</span>
+          </div>
+        `;
+        calendarBody.appendChild(cell);
+      }
+    }
+
+    // 날짜별 상세 모달
+    function openDayDetailModal(dateObj, events, holidayCheck) {
+      const modal = document.getElementById('modalDayDetail');
+      document.getElementById('dayDetailTitle').textContent = `${formatDateKorean(dateObj)} 세무 일정`;
+      const body = document.getElementById('dayDetailBody');
+
+      let html = '';
+      if (holidayCheck.isOff) {
+        html += `<div class="badge badge-urgent" style="align-self: flex-start; margin-bottom: 6px;">공휴일/휴무: ${holidayCheck.reason}</div>`;
+      }
+
+      if (events.length === 0) {
+        html += `<p style="color: var(--text-muted); font-size: 14px; padding: 12px 0;">등록된 마감 일정이 없습니다.</p>`;
+      } else {
+        html += events.map(ev => `
+          <div class="card" style="padding: 12px; margin-bottom: 6px; background-color: var(--bg-card-sub);">
+            <div style="font-weight: 700; color: var(--navy-primary); font-size: 15px;">
+              ${ev.title} ${ev.isPostponed ? '<span class="badge badge-postponed">순연적용</span>' : ''}
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              • 세목: ${ev.category} | 비고: ${ev.note || '-'}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      body.innerHTML = html;
+      modal.classList.add('show');
+    }
+
+    // ============================================================
+    // 💰 탭 2. 4대보험 및 급여 계산기 로직
+    // ============================================================
+
+    function calculatePayroll() {
+      const grossInput = document.getElementById('inputGrossSalary').value;
+      const nonTaxableInput = document.getElementById('inputNonTaxable').value;
+      const scaleKey = document.getElementById('selectEmployerScale').value;
+      const incomeTaxInput = document.getElementById('inputIncomeTax').value;
+
+      const errGross = document.getElementById('errGrossSalary');
+      const errNonTax = document.getElementById('errNonTaxable');
+      const errTax = document.getElementById('errIncomeTax');
+
+      // 입력값 유효성 검증
+      let hasError = false;
+      const cleanGross = String(grossInput).replace(/,/g, '').trim();
+      const cleanNonTax = String(nonTaxableInput).replace(/,/g, '').trim();
+      const cleanTax = String(incomeTaxInput).replace(/,/g, '').trim();
+
+      if (cleanGross === '' || isNaN(cleanGross) || Number(cleanGross) < 0) {
+        errGross.classList.add('show');
+        hasError = true;
+      } else {
+        errGross.classList.remove('show');
+      }
+
+      if (cleanNonTax === '' || isNaN(cleanNonTax) || Number(cleanNonTax) < 0) {
+        errNonTax.classList.add('show');
+        hasError = true;
+      } else {
+        errNonTax.classList.remove('show');
+      }
+
+      if (cleanTax === '' || isNaN(cleanTax) || Number(cleanTax) < 0) {
+        errTax.classList.add('show');
+        hasError = true;
+      } else {
+        errTax.classList.remove('show');
+      }
+
+      if (hasError) {
+        // 오류 시 계산하지 않고 대시보드 및 결과 표 초기화
+        document.getElementById('kpiNetSalary').textContent = '-';
+        document.getElementById('kpiTaxableSalary').textContent = '-';
+        document.getElementById('kpiWorkerDeduction').textContent = '-';
+        document.getElementById('kpiEmployerCost').textContent = '-';
+
+        document.getElementById('rowNpsWorker').textContent = '-';
+        document.getElementById('rowNpsEmployer').textContent = '-';
+        document.getElementById('rowNpsTotal').textContent = '-';
+
+        document.getElementById('rowHealthWorker').textContent = '-';
+        document.getElementById('rowHealthEmployer').textContent = '-';
+        document.getElementById('rowHealthTotal').textContent = '-';
+
+        document.getElementById('rowCareWorker').textContent = '-';
+        document.getElementById('rowCareEmployer').textContent = '-';
+        document.getElementById('rowCareTotal').textContent = '-';
+
+        document.getElementById('rowEmpWorker').textContent = '-';
+        document.getElementById('rowEmpEmployer').textContent = '-';
+        document.getElementById('rowEmpTotal').textContent = '-';
+
+        document.getElementById('rowIncomeTaxWorker').textContent = '-';
+        document.getElementById('rowIncomeTaxTotal').textContent = '-';
+
+        document.getElementById('rowLocalTaxWorker').textContent = '-';
+        document.getElementById('rowLocalTaxTotal').textContent = '-';
+
+        document.getElementById('rowTotalWorker').textContent = '-';
+        document.getElementById('rowTotalEmployer').textContent = '-';
+        document.getElementById('rowGrandTotal').textContent = '-';
+        document.getElementById('rowFootNetSalary').textContent = '-';
+        return null;
+      }
+
+      const grossSalary = Number(cleanGross);
+      const nonTaxable = Number(cleanNonTax);
+      const incomeTax = Number(cleanTax);
+
+      // 보수월액 = 월 급여 - 비과세 금액
+      const taxableSalary = Math.max(0, grossSalary - nonTaxable);
+
+      // 절사 헬퍼 함수
+      const truncUnit = appSettings.truncationUnit || 10;
+      function applyTruncation(amount) {
+        if (truncUnit === 10) {
+          return Math.floor(Math.round(amount) / 10) * 10;
+        }
+        return Math.floor(Math.round(amount));
+      }
+
+      // 1. 국민연금 계산: 기준소득월액 상·하한 적용 후 9.5% ÷ 2 (근로자 4.75%, 사업주 4.75%)
+      const lower = appSettings.npsLowerLimit || 410000;
+      const upper = appSettings.npsUpperLimit || 6590000;
+      const standardSalary = Math.min(upper, Math.max(lower, taxableSalary));
+      const npsTotalRate = (appSettings.npsRate || 9.5) / 100;
+
+      // 근로자: 기준소득월액 × 9.5% ÷ 2
+      const npsWorker = applyTruncation(standardSalary * (npsTotalRate / 2));
+      const npsEmployer = applyTruncation(standardSalary * (npsTotalRate / 2));
+      const npsTotal = npsWorker + npsEmployer;
+
+      // 2. 건강보험: 보수월액 × 7.19% ÷ 2 (근로자/사업주 각 3.595%)
+      const healthTotalRate = (appSettings.healthRate || 7.19) / 100;
+      const healthWorker = applyTruncation(taxableSalary * (healthTotalRate / 2));
+      const healthEmployer = applyTruncation(taxableSalary * (healthTotalRate / 2));
+      const healthTotal = healthWorker + healthEmployer;
+
+      // 3. 노인장기요양보험: 건강보험료 × (0.9448 ÷ 7.19) → 근로자/사업주 각 절반
+      const careRatio = (appSettings.careNumerator || 0.9448) / (appSettings.careDenominator || 7.19);
+      const careWorker = applyTruncation(healthWorker * careRatio);
+      const careEmployer = applyTruncation(healthEmployer * careRatio);
+      const careTotal = careWorker + careEmployer;
+
+      // 4. 고용보험
+      // 근로자 = 보수월액 × 0.9%
+      const empWorkerRate = (appSettings.empWorkerRate || 0.9) / 100;
+      const empWorker = applyTruncation(taxableSalary * empWorkerRate);
+
+      // 사업주 = 보수월액 × (0.9% + 규모별 요율)
+      const scaleAddRate = ((appSettings.empScaleRates && appSettings.empScaleRates[scaleKey]) ?? 0.25) / 100;
+      const empEmployerRate = empWorkerRate + scaleAddRate;
+      const empEmployer = applyTruncation(taxableSalary * empEmployerRate);
+      const empTotal = empWorker + empEmployer;
+
+      // 5. 지방소득세 = 소득세 × 10% (10원 미만 절사)
+      const localIncomeTax = applyTruncation(incomeTax * 0.1);
+
+      // 총액 합산
+      const workerDeductionTotal = npsWorker + healthWorker + careWorker + empWorker + incomeTax + localIncomeTax;
+      const employerContributionTotal = npsEmployer + healthEmployer + careEmployer + empEmployer;
+      const netSalary = grossSalary - workerDeductionTotal;
+      const totalLaborCost = grossSalary + employerContributionTotal;
+
+      const result = {
+        grossSalary,
+        nonTaxable,
+        taxableSalary,
+        standardSalary,
+        npsWorker,
+        npsEmployer,
+        npsTotal,
+        healthWorker,
+        healthEmployer,
+        healthTotal,
+        careWorker,
+        careEmployer,
+        careTotal,
+        empWorker,
+        empEmployer,
+        empTotal,
+        incomeTax,
+        localIncomeTax,
+        workerDeductionTotal,
+        employerContributionTotal,
+        netSalary,
+        totalLaborCost,
+        scaleKey
+      };
+
+      renderPayrollResult(result);
+      return result;
+    }
+
+    function renderPayrollResult(res) {
+      if (!res) return;
+
+      document.getElementById('kpiNetSalary').textContent = `${formatCurrency(res.netSalary)}원`;
+      document.getElementById('kpiTaxableSalary').textContent = `${formatCurrency(res.taxableSalary)}원`;
+      document.getElementById('kpiWorkerDeduction').textContent = `${formatCurrency(res.workerDeductionTotal)}원`;
+      document.getElementById('kpiEmployerCost').textContent = `${formatCurrency(res.totalLaborCost)}원`;
+
+      document.getElementById('rowNpsWorker').textContent = `${formatCurrency(res.npsWorker)}원`;
+      document.getElementById('rowNpsEmployer').textContent = `${formatCurrency(res.npsEmployer)}원`;
+      document.getElementById('rowNpsTotal').textContent = `${formatCurrency(res.npsTotal)}원`;
+      document.getElementById('rowNpsDesc').textContent = `기준소득월액 ${formatCurrency(res.standardSalary)}원 적용 (4.75%)`;
+
+      document.getElementById('rowHealthWorker').textContent = `${formatCurrency(res.healthWorker)}원`;
+      document.getElementById('rowHealthEmployer').textContent = `${formatCurrency(res.healthEmployer)}원`;
+      document.getElementById('rowHealthTotal').textContent = `${formatCurrency(res.healthTotal)}원`;
+
+      document.getElementById('rowCareWorker').textContent = `${formatCurrency(res.careWorker)}원`;
+      document.getElementById('rowCareEmployer').textContent = `${formatCurrency(res.careEmployer)}원`;
+      document.getElementById('rowCareTotal').textContent = `${formatCurrency(res.careTotal)}원`;
+
+      document.getElementById('rowEmpWorker').textContent = `${formatCurrency(res.empWorker)}원`;
+      document.getElementById('rowEmpEmployer').textContent = `${formatCurrency(res.empEmployer)}원`;
+      document.getElementById('rowEmpTotal').textContent = `${formatCurrency(res.empTotal)}원`;
+
+      document.getElementById('rowIncomeTaxWorker').textContent = `${formatCurrency(res.incomeTax)}원`;
+      document.getElementById('rowIncomeTaxTotal').textContent = `${formatCurrency(res.incomeTax)}원`;
+
+      document.getElementById('rowLocalTaxWorker').textContent = `${formatCurrency(res.localIncomeTax)}원`;
+      document.getElementById('rowLocalTaxTotal').textContent = `${formatCurrency(res.localIncomeTax)}원`;
+
+      document.getElementById('rowTotalWorker').textContent = `${formatCurrency(res.workerDeductionTotal)}원`;
+      document.getElementById('rowTotalEmployer').textContent = `${formatCurrency(res.employerContributionTotal)}원`;
+      document.getElementById('rowGrandTotal').textContent = `${formatCurrency(res.workerDeductionTotal + res.employerContributionTotal)}원`;
+      document.getElementById('rowFootNetSalary').textContent = `${formatCurrency(res.netSalary)}원`;
+    }
+
+    // 급여대장용 TSV 클립보드 복사
+    function copyPayrollToClipboard() {
+      const res = calculatePayroll();
+      if (!res) {
+        showToast('올바른 급여 정보를 먼저 입력해 주세요.', 'error');
+        return;
+      }
+
+      const rows = [
+        ['[급여 및 4대보험 공제 계산서]'],
+        ['항목', '근로자 부담 (원)', '사업주 부담 (원)', '합계 (원)', '비고 및 산출내역'],
+        ['국민연금', res.npsWorker, res.npsEmployer, res.npsTotal, `기준소득월액 ${res.standardSalary}원`],
+        ['건강보험', res.healthWorker, res.healthEmployer, res.healthTotal, '보수월액 기준 7.19%'],
+        ['노인장기요양보험', res.careWorker, res.careEmployer, res.careTotal, '건강보험료의 (0.9448 ÷ 7.19)'],
+        ['고용보험', res.empWorker, res.empEmployer, res.empTotal, '실업급여 + 고용안정직능'],
+        ['소득세', res.incomeTax, 0, res.incomeTax, '간이세액표 직접입력'],
+        ['지방소득세', res.localIncomeTax, 0, res.localIncomeTax, '소득세의 10% 절사'],
+        ['공제 합계', res.workerDeductionTotal, res.employerContributionTotal, (res.workerDeductionTotal + res.employerContributionTotal), ''],
+        [''],
+        ['월 급여(세전)', res.grossSalary, '비과세 금액', res.nonTaxable],
+        ['과세 보수월액', res.taxableSalary, '실수령액(세후)', res.netSalary],
+        ['회사 총 인건비', res.totalLaborCost, '', '']
+      ];
+
+      const tsv = rows.map(r => r.join('\t')).join('\n');
+      copyTextToClipboard(tsv, '급여 계산 내역이 클립보드에 복사되었습니다! 엑셀에 Ctrl+V 하세요.');
+    }
+
+    // ============================================================
+    // 🧾 탭 3. 부가가치세 계산기 로직
+    // ============================================================
+
+    // 부가세 단건 계산 로직 (모드 2개)
+    function computeVatSingle(amount, mode) {
+      const rate = (appSettings.vatRate || 10) / 100;
+      let supply = 0;
+      let vat = 0;
+      let total = 0;
+
+      if (mode === 'supplyToTotal') {
+        // 공급가액 → 합계
+        supply = Math.round(amount);
+        vat = Math.floor(supply * rate);
+        total = supply + vat;
+      } else {
+        // 합계 → 공급가액 역산 (정확한 1:1 일치 보장)
+        total = Math.round(amount);
+        supply = Math.round(total / (1 + rate));
+        vat = total - supply; // 세 숫자가 항상 완벽히 맞아떨어짐
+      }
+
+      return { supply, vat, total };
+    }
+
+    // 단건 즉시 계산기 갱신
+    function updateQuickVat() {
+      const inputEl = document.getElementById('inputQuickVatAmount');
+      const errEl = document.getElementById('errQuickVat');
+      const clean = String(inputEl.value).replace(/,/g, '').trim();
+
+      if (clean === '' || isNaN(clean) || Number(clean) < 0) {
+        errEl.classList.add('show');
+        document.getElementById('quickResultSupply').textContent = '-';
+        document.getElementById('quickResultVat').textContent = '-';
+        document.getElementById('quickResultTotal').textContent = '-';
+        return;
+      }
+      errEl.classList.remove('show');
+
+      const amount = Number(clean);
+      const res = computeVatSingle(amount, vatCurrentMode);
+
+      document.getElementById('quickResultSupply').textContent = `${formatCurrency(res.supply)}원`;
+      document.getElementById('quickResultVat').textContent = `${formatCurrency(res.vat)}원`;
+      document.getElementById('quickResultTotal').textContent = `${formatCurrency(res.total)}원`;
+
+      if (vatCurrentMode === 'supplyToTotal') {
+        document.getElementById('quickResultVatSub').textContent = `공급가액의 ${appSettings.vatRate || 10}%`;
+      } else {
+        document.getElementById('quickResultVatSub').textContent = '합계에서 공급가액을 차감한 세액';
+      }
+    }
+
+    // 부가세 표 다건 렌더링
+    function renderVatBatchTable() {
+      const tbody = document.getElementById('vatTableBody');
+      tbody.innerHTML = '';
+
+      let sumSupply = 0;
+      let sumVat = 0;
+      let sumTotal = 0;
+
+      if (vatBatchItems.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center" style="padding: 24px; color: var(--text-muted);">
+              등록된 항목이 없습니다. 상단에서 추가하거나 [➕ 행 추가] 버튼을 누르세요.
+            </td>
+          </tr>
+        `;
+      } else {
+        vatBatchItems.forEach((item, index) => {
+          const res = computeVatSingle(item.amount, item.mode);
+          sumSupply += res.supply;
+          sumVat += res.vat;
+          sumTotal += res.total;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="text-center">${index + 1}</td>
+            <td>
+              <input type="text" class="form-input row-memo" value="${item.memo}" placeholder="품목/거래처명" style="height: 36px; font-size: 14px;">
+            </td>
+            <td>
+              <select class="form-select row-mode" style="height: 36px; font-size: 13px;">
+                <option value="supplyToTotal" ${item.mode === 'supplyToTotal' ? 'selected' : ''}>공급가액➔합계</option>
+                <option value="totalToSupply" ${item.mode === 'totalToSupply' ? 'selected' : ''}>합계➔공급가액</option>
+              </select>
+            </td>
+            <td class="text-right">
+              <input type="text" class="form-input text-right row-amount" value="${formatCurrency(item.amount)}" style="height: 36px; font-size: 14px;">
+            </td>
+            <td class="text-right" style="font-weight: 600;">${formatCurrency(res.supply)}원</td>
+            <td class="text-right" style="color: var(--navy-primary); font-weight: 600;">${formatCurrency(res.vat)}원</td>
+            <td class="text-right" style="font-weight: 700;">${formatCurrency(res.total)}원</td>
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm row-delete-btn" title="삭제">&times;</button>
+            </td>
+          `;
+
+          // 행 내부 인라인 수정 이벤트
+          const memoInput = tr.querySelector('.row-memo');
+          const modeSelect = tr.querySelector('.row-mode');
+          const amountInput = tr.querySelector('.row-amount');
+          const deleteBtn = tr.querySelector('.row-delete-btn');
+
+          memoInput.addEventListener('change', () => {
+            vatBatchItems[index].memo = memoInput.value;
+          });
+
+          modeSelect.addEventListener('change', () => {
+            vatBatchItems[index].mode = modeSelect.value;
+            renderVatBatchTable();
+          });
+
+          bindAutoCommaInput(amountInput, () => {
+            const raw = parseNumber(amountInput.value);
+            vatBatchItems[index].amount = raw;
+            renderVatBatchTable();
+          });
+
+          deleteBtn.addEventListener('click', () => {
+            vatBatchItems.splice(index, 1);
+            renderVatBatchTable();
+          });
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('vatTotalCount').textContent = vatBatchItems.length;
+      document.getElementById('vatTotalSupply').textContent = `${formatCurrency(sumSupply)}원`;
+      document.getElementById('vatTotalTax').textContent = `${formatCurrency(sumVat)}원`;
+      document.getElementById('vatTotalAmount').textContent = `${formatCurrency(sumTotal)}원`;
+    }
+
+    // 부가세 목록 엑셀 복사
+    function copyVatTableToClipboard() {
+      if (vatBatchItems.length === 0) {
+        showToast('복사할 부가세 계산 내역이 없습니다.', 'error');
+        return;
+      }
+
+      const rows = [
+        ['순번', '품목/거래처명', '모드', '공급가액 (원)', '부가세액 (원)', '합계금액 (원)']
+      ];
+
+      let sumSupply = 0;
+      let sumVat = 0;
+      let sumTotal = 0;
+
+      vatBatchItems.forEach((item, idx) => {
+        const res = computeVatSingle(item.amount, item.mode);
+        sumSupply += res.supply;
+        sumVat += res.vat;
+        sumTotal += res.total;
+        rows.push([
+          idx + 1,
+          item.memo || '-',
+          item.mode === 'supplyToTotal' ? '공급가액 기준' : '합계금액 역산',
+          res.supply,
+          res.vat,
+          res.total
+        ]);
+      });
+
+      rows.push(['합계', `${vatBatchItems.length}건`, '', sumSupply, sumVat, sumTotal]);
+
+      const tsv = rows.map(r => r.join('\t')).join('\n');
+      copyTextToClipboard(tsv, '부가세 목록이 클립보드에 복사되었습니다! 엑셀에 Ctrl+V 하세요.');
+    }
+
+    // ============================================================
+    // ⚙️ 탭 4. 설정 관리 로직
+    // ============================================================
+
+    function syncSettingsInputs() {
+      document.getElementById('cfgNpsRate').value = appSettings.npsRate ?? 9.5;
+      document.getElementById('cfgNpsLower').value = formatCurrency(appSettings.npsLowerLimit ?? 410000);
+      document.getElementById('cfgNpsUpper').value = formatCurrency(appSettings.npsUpperLimit ?? 6590000);
+
+      document.getElementById('cfgHealthRate').value = appSettings.healthRate ?? 7.19;
+      document.getElementById('cfgCareNumerator').value = appSettings.careNumerator ?? 0.9448;
+
+      document.getElementById('cfgEmpWorkerRate').value = appSettings.empWorkerRate ?? 0.9;
+      document.getElementById('cfgScaleUnder150').value = appSettings.empScaleRates?.under150 ?? 0.25;
+      document.getElementById('cfgScaleOver150P').value = appSettings.empScaleRates?.over150Priority ?? 0.45;
+
+      document.getElementById('cfgTruncation').value = String(appSettings.truncationUnit ?? 10);
+      document.getElementById('cfgVatRate').value = appSettings.vatRate ?? 10;
+
+      renderSettingsScheduleTable();
+      renderHolidayTable();
+    }
+
+    function renderSettingsScheduleTable() {
+      const tbody = document.getElementById('settingsScheduleTableBody');
+      tbody.innerHTML = appSettings.schedules.map((sch, idx) => {
+        const cycleText = sch.cycle === 'monthly' ? '매월' : `매년 ${sch.month}월`;
+        return `
+          <tr>
+            <td><strong>${sch.title}</strong></td>
+            <td>${cycleText}</td>
+            <td>${sch.day}일</td>
+            <td><span class="badge badge-normal">${sch.category}</span></td>
+            <td style="color: var(--text-muted); font-size: 13px;">${sch.note || '-'}</td>
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm btn-delete-sch" data-index="${idx}">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.querySelectorAll('.btn-delete-sch').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+          if (confirm(`'${appSettings.schedules[idx].title}' 일정을 삭제하시겠습니까?`)) {
+            appSettings.schedules.splice(idx, 1);
+            saveSettings();
+            renderSettingsScheduleTable();
+            renderScheduleTab();
+            showToast('일정이 삭제되었습니다.');
+          }
+        });
+      });
+    }
+
+    function renderHolidayTable() {
+      const tbody = document.getElementById('holidayTableBody');
+      const holidays = appSettings.customHolidays || [];
+
+      if (holidays.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center" style="padding: 16px; color: var(--text-muted);">
+              등록된 사용자 공휴일이 없습니다. 위에서 설날·추석 등의 날짜를 추가하세요.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = holidays.map((h, idx) => `
+        <tr>
+          <td><strong>${h.date}</strong></td>
+          <td>${h.name}</td>
+          <td><span class="badge badge-warning">사용자 지정</span></td>
+          <td class="text-center">
+            <button class="btn btn-danger btn-sm btn-delete-holiday" data-index="${idx}">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.btn-delete-holiday').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+          appSettings.customHolidays.splice(idx, 1);
+          saveSettings();
+          renderHolidayTable();
+          renderScheduleTab();
+          showToast('공휴일이 삭제되었습니다.');
+        });
+      });
+    }
+
+    // ============================================================
+    // 🚀 이벤트 리스너 등록 및 앱 초기화
+    // ============================================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. 설정 불러오기
+      loadSettings();
+
+      // 2. 테마 초기화
+      try {
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.getElementById('themeIcon').textContent = '☀️';
+          document.getElementById('btnToggleTheme').innerHTML = '<span>☀️</span> 라이트 모드';
+        }
+      } catch (e) {}
+
+      // 테마 토글 버튼
+      document.getElementById('btnToggleTheme').addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme');
+          document.getElementById('btnToggleTheme').innerHTML = '<span>🌓</span> 다크 모드';
+          try { localStorage.setItem(THEME_KEY, 'light'); } catch (e) {}
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.getElementById('btnToggleTheme').innerHTML = '<span>☀️</span> 라이트 모드';
+          try { localStorage.setItem(THEME_KEY, 'dark'); } catch (e) {}
+        }
+      });
+
+      // 인쇄 버튼
+      document.getElementById('btnPrint').addEventListener('click', () => {
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}.${now.getMonth() + 1}.${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('printDateTime').textContent = `출력일시: ${dateStr} | 세무 실무 참고용`;
+        window.print();
+      });
+
+      // 3. 탭 네비게이션
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          tabPanels.forEach(p => p.classList.remove('active'));
+
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          const targetId = btn.getAttribute('data-tab');
+          document.getElementById(targetId).classList.add('active');
+
+          if (targetId === 'tab-schedule') renderScheduleTab();
+          if (targetId === 'tab-settings') syncSettingsInputs();
+        });
+      });
+
+      // 4. [탭 1] 신고 일정 이벤트
+      document.getElementById('btnFilterBoth').addEventListener('click', () => {
+        currentScheduleFilter = 'both';
+        setFilterButtons();
+        renderScheduleTab();
+      });
+      document.getElementById('btnFilterThisMonth').addEventListener('click', () => {
+        currentScheduleFilter = 'this';
+        setFilterButtons();
+        renderScheduleTab();
+      });
+      document.getElementById('btnFilterNextMonth').addEventListener('click', () => {
+        currentScheduleFilter = 'next';
+        setFilterButtons();
+        renderScheduleTab();
+      });
+
+      function setFilterButtons() {
+        document.getElementById('btnFilterBoth').className = currentScheduleFilter === 'both' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+        document.getElementById('btnFilterThisMonth').className = currentScheduleFilter === 'this' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+        document.getElementById('btnFilterNextMonth').className = currentScheduleFilter === 'next' ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+      }
+
+      document.getElementById('btnViewList').addEventListener('click', () => {
+        currentScheduleView = 'list';
+        document.getElementById('btnViewList').className = 'btn btn-primary btn-sm';
+        document.getElementById('btnViewCalendar').className = 'btn btn-outline btn-sm';
+        document.getElementById('scheduleListView').style.display = 'block';
+        document.getElementById('scheduleCalendarView').style.display = 'none';
+      });
+
+      document.getElementById('btnViewCalendar').addEventListener('click', () => {
+        currentScheduleView = 'calendar';
+        document.getElementById('btnViewCalendar').className = 'btn btn-primary btn-sm';
+        document.getElementById('btnViewList').className = 'btn btn-outline btn-sm';
+        document.getElementById('scheduleListView').style.display = 'none';
+        document.getElementById('scheduleCalendarView').style.display = 'block';
+        renderCalendarView();
+      });
+
+      document.getElementById('btnCalPrev').addEventListener('click', () => {
+        calendarTargetDate.setMonth(calendarTargetDate.getMonth() - 1);
+        renderCalendarView();
+      });
+
+      document.getElementById('btnCalNext').addEventListener('click', () => {
+        calendarTargetDate.setMonth(calendarTargetDate.getMonth() + 1);
+        renderCalendarView();
+      });
+
+      document.getElementById('btnCloseDayDetail').addEventListener('click', () => {
+        document.getElementById('modalDayDetail').classList.remove('show');
+      });
+      document.getElementById('btnCloseDayDetailBtn').addEventListener('click', () => {
+        document.getElementById('modalDayDetail').classList.remove('show');
+      });
+
+      // 5. [탭 2] 급여 계산기 이벤트
+      bindAutoCommaInput(document.getElementById('inputGrossSalary'), calculatePayroll);
+      bindAutoCommaInput(document.getElementById('inputNonTaxable'), calculatePayroll);
+      bindAutoCommaInput(document.getElementById('inputIncomeTax'), calculatePayroll);
+
+      document.getElementById('selectEmployerScale').addEventListener('change', () => {
+        calculatePayroll();
+      });
+
+      document.getElementById('btnCopyPayroll').addEventListener('click', copyPayrollToClipboard);
+
+      // 6. [탭 3] 부가세 계산기 이벤트
+      const btnModeSupply = document.getElementById('btnVatModeSupply');
+      const btnModeTotal = document.getElementById('btnVatModeTotal');
+      const labelVatQuick = document.getElementById('labelVatQuickInput');
+
+      btnModeSupply.addEventListener('click', () => {
+        vatCurrentMode = 'supplyToTotal';
+        btnModeSupply.className = 'btn btn-primary btn-sm';
+        btnModeTotal.className = 'btn btn-outline btn-sm';
+        labelVatQuick.textContent = '공급가액 입력';
+        updateQuickVat();
+      });
+
+      btnModeTotal.addEventListener('click', () => {
+        vatCurrentMode = 'totalToSupply';
+        btnModeTotal.className = 'btn btn-primary btn-sm';
+        btnModeSupply.className = 'btn btn-outline btn-sm';
+        labelVatQuick.textContent = '합계금액 (공급대가) 입력';
+        updateQuickVat();
+      });
+
+      const inputQuickVat = document.getElementById('inputQuickVatAmount');
+      bindAutoCommaInput(inputQuickVat, updateQuickVat);
+
+      document.getElementById('btnApplyQuickToTable').addEventListener('click', () => {
+        const val = parseNumber(inputQuickVat.value);
+        if (val <= 0) {
+          showToast('0원 이상의 유효한 금액을 입력하세요.', 'error');
+          return;
+        }
+        vatBatchItems.push({
+          memo: vatCurrentMode === 'supplyToTotal' ? '매출 세금계산서' : '카드/영수증 매입',
+          amount: val,
+          mode: vatCurrentMode
+        });
+        renderVatBatchTable();
+        showToast('목록에 추가되었습니다.');
+      });
+
+      document.getElementById('btnAddVatRow').addEventListener('click', () => {
+        vatBatchItems.push({
+          memo: '',
+          amount: 1100000,
+          mode: 'totalToSupply'
+        });
+        renderVatBatchTable();
+      });
+
+      document.getElementById('btnClearVatRows').addEventListener('click', () => {
+        if (vatBatchItems.length === 0) return;
+        if (confirm('모든 계산 항목을 비우시겠습니까?')) {
+          vatBatchItems = [];
+          renderVatBatchTable();
+          showToast('목록이 비워졌습니다.');
+        }
+      });
+
+      document.getElementById('btnCopyVatTable').addEventListener('click', copyVatTableToClipboard);
+
+      // 7. [탭 4] 설정 이벤트
+      bindAutoCommaInput(document.getElementById('cfgNpsLower'));
+      bindAutoCommaInput(document.getElementById('cfgNpsUpper'));
+
+      document.getElementById('btnSaveRates').addEventListener('click', () => {
+        appSettings.npsRate = parseFloat(document.getElementById('cfgNpsRate').value) || 9.5;
+        appSettings.npsLowerLimit = parseNumber(document.getElementById('cfgNpsLower').value);
+        appSettings.npsUpperLimit = parseNumber(document.getElementById('cfgNpsUpper').value);
+        appSettings.healthRate = parseFloat(document.getElementById('cfgHealthRate').value) || 7.19;
+        appSettings.careNumerator = parseFloat(document.getElementById('cfgCareNumerator').value) || 0.9448;
+        appSettings.empWorkerRate = parseFloat(document.getElementById('cfgEmpWorkerRate').value) || 0.9;
+
+        appSettings.empScaleRates = appSettings.empScaleRates || {};
+        appSettings.empScaleRates.under150 = parseFloat(document.getElementById('cfgScaleUnder150').value) || 0.25;
+        appSettings.empScaleRates.over150Priority = parseFloat(document.getElementById('cfgScaleOver150P').value) || 0.45;
+
+        appSettings.truncationUnit = parseInt(document.getElementById('cfgTruncation').value, 10) || 10;
+        appSettings.vatRate = parseFloat(document.getElementById('cfgVatRate').value) || 10;
+
+        if (saveSettings()) {
+          showToast('요율 설정이 성공적으로 저장되었습니다!');
+          calculatePayroll();
+          updateQuickVat();
+          renderVatBatchTable();
+        } else {
+          showToast('저장에 실패했습니다.', 'error');
+        }
+      });
+
+      // 2026 기본값으로 초기화
+      document.getElementById('btnResetTo2026').addEventListener('click', () => {
+        if (confirm('모든 요율 및 일정을 2026년 기본값으로 초기화하시겠습니까?')) {
+          appSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+          saveSettings();
+          syncSettingsInputs();
+          calculatePayroll();
+          renderScheduleTab();
+          updateQuickVat();
+          renderVatBatchTable();
+          showToast('2026년 기본값으로 초기화되었습니다.');
+        }
+      });
+
+      // 공휴일 추가
+      document.getElementById('btnAddHoliday').addEventListener('click', () => {
+        const dateVal = document.getElementById('inputHolidayDate').value;
+        const nameVal = document.getElementById('inputHolidayName').value.trim();
+
+        if (!dateVal) {
+          showToast('공휴일 날짜를 선택해 주세요.', 'error');
+          return;
+        }
+        if (!nameVal) {
+          showToast('공휴일 명칭을 입력해 주세요. (예: 설날 연휴)', 'error');
+          return;
+        }
+
+        appSettings.customHolidays = appSettings.customHolidays || [];
+        // 중복 방지
+        const existingIdx = appSettings.customHolidays.findIndex(h => h.date === dateVal);
+        if (existingIdx >= 0) {
+          appSettings.customHolidays[existingIdx].name = nameVal;
+        } else {
+          appSettings.customHolidays.push({ date: dateVal, name: nameVal });
+        }
+
+        // 날짜순 정렬
+        appSettings.customHolidays.sort((a, b) => a.date.localeCompare(b.date));
+
+        saveSettings();
+        renderHolidayTable();
+        renderScheduleTab();
+
+        document.getElementById('inputHolidayName').value = '';
+        showToast(`'${nameVal}' 공휴일이 추가되었습니다.`);
+      });
+
+      // 새 신고 일정 모달 열기/닫기
+      const modalAddSchedule = document.getElementById('modalAddSchedule');
+      document.getElementById('btnOpenAddScheduleModal').addEventListener('click', () => {
+        modalAddSchedule.classList.add('show');
+      });
+      document.getElementById('btnCloseScheduleModal').addEventListener('click', () => {
+        modalAddSchedule.classList.remove('show');
+      });
+      document.getElementById('btnCancelAddSchedule').addEventListener('click', () => {
+        modalAddSchedule.classList.remove('show');
+      });
+
+      document.getElementById('modalSchCycle').addEventListener('change', (e) => {
+        const isYearly = e.target.value === 'yearly';
+        document.getElementById('modalSchMonthGroup').style.display = isYearly ? 'block' : 'none';
+      });
+
+      document.getElementById('btnConfirmAddSchedule').addEventListener('click', () => {
+        const title = document.getElementById('modalSchTitle').value.trim();
+        const cycle = document.getElementById('modalSchCycle').value;
+        const month = cycle === 'yearly' ? parseInt(document.getElementById('modalSchMonth').value, 10) : 0;
+        const day = parseInt(document.getElementById('modalSchDay').value, 10);
+        const category = document.getElementById('modalSchCategory').value.trim() || '기타';
+        const note = document.getElementById('modalSchNote').value.trim();
+
+        if (!title) {
+          showToast('일정 제목을 입력하세요.', 'error');
+          return;
+        }
+        if (isNaN(day) || day < 1 || day > 31) {
+          showToast('마감 일자는 1~31일 사이 숫자여야 합니다.', 'error');
+          return;
+        }
+
+        const newSch = {
+          id: 'sch-' + Date.now(),
+          title,
+          cycle,
+          month,
+          day,
+          category,
+          note
+        };
+
+        appSettings.schedules.push(newSch);
+        saveSettings();
+        renderSettingsScheduleTable();
+        renderScheduleTab();
+
+        modalAddSchedule.classList.remove('show');
+        document.getElementById('modalSchTitle').value = '';
+        document.getElementById('modalSchNote').value = '';
+        showToast(`'${title}' 일정이 등록되었습니다.`);
+      });
+
+      // 설정 내보내기 (JSON 파일 다운로드)
+      document.getElementById('btnExportSettings').addEventListener('click', () => {
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appSettings, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute('href', dataStr);
+        downloadAnchor.setAttribute('download', `세무실무도우미_설정_${formatDateYMD(new Date())}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast('설정 파일이 다운로드되었습니다.');
+      });
+
+      // 설정 불러오기 (JSON 파일 업로드)
+      document.getElementById('inputFileImport').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const imported = JSON.parse(event.target.result);
+            if (imported && (imported.npsRate || imported.schedules)) {
+              appSettings = Object.assign({}, DEFAULT_SETTINGS, imported);
+              saveSettings();
+              syncSettingsInputs();
+              calculatePayroll();
+              renderScheduleTab();
+              updateQuickVat();
+              renderVatBatchTable();
+              showToast('설정을 성공적으로 불러왔습니다!');
+            } else {
+              showToast('올바르지 않은 설정 파일입니다.', 'error');
+            }
+          } catch (err) {
+            showToast('JSON 파일을 읽는 중 오류가 발생했습니다.', 'error');
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // 초기화
+      });
+
+      // 8. 초기 렌더링 실행
+      renderScheduleTab();
+      calculatePayroll();
+      updateQuickVat();
+
+      // 기본 예시 데이터 1건 채우기
+      vatBatchItems = [
+        { memo: '사무용품 구입 (알파문구)', amount: 1100000, mode: 'totalToSupply' }
+      ];
+      renderVatBatchTable();
+    });
+  </script>
+</body>
+</html>
